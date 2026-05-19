@@ -36,7 +36,6 @@ st.markdown("""
 html,body,[class*="css"]{font-family:'IBM Plex Sans',sans-serif;background:var(--cream);color:var(--ink)}
 .stApp{background:var(--cream)}
 
-/* Tab labels */
 .stTabs [data-baseweb="tab"]{
     font-family:'IBM Plex Mono',monospace;
     font-size:13px;
@@ -51,12 +50,10 @@ html,body,[class*="css"]{font-family:'IBM Plex Sans',sans-serif;background:var(-
     border-bottom:2px solid #d4c4a8;
 }
 
-/* All text elements darker */
 p, span, div, label {color:#1B2A4A}
 .stMarkdown p {color:#333333}
 .stCaption p {color:#555555}
 
-/* Slider labels */
 div[data-testid="stSlider"] label{
     font-family:'IBM Plex Mono',monospace;
     font-size:12px;
@@ -70,8 +67,6 @@ div[data-testid="stSelectSlider"] label{
 div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p{
     color:#1B2A4A !important;
 }
-
-/* Select slider tick labels */
 div[data-testid="stSelectSlider"] div {
     color:#1B2A4A !important;
 }
@@ -212,17 +207,18 @@ def get_signal(pval, latest_india, latest_sg):
         return "QUIESCENT","sv-quiet","No significant upstream transmission detected. Cycles appear decoupled."
 
 # ── LOAD ───────────────────────────────────────────────────────────────────────
-df            = generate_cpi_data()
+df              = generate_cpi_data()
 granger_results = run_granger(df)
-persistence   = compute_persistence(df)
-rolling       = rolling_granger(df)
-var_result    = fit_var_model(df)
-latest        = df.iloc[-1]
-latest_date   = df.index[-1]
-g_india_sg    = next(r for r in granger_results if r['cause']=='India' and r['effect']=='Singapore')
-signal_text, signal_class, signal_note = get_signal(g_india_sg['pval'], latest['India'], latest['Singapore'])
+persistence     = compute_persistence(df)
+rolling         = rolling_granger(df)
+var_result      = fit_var_model(df)
+latest          = df.iloc[-1]
+latest_date     = df.index[-1]
+g_india_sg      = next(r for r in granger_results if r['cause']=='India' and r['effect']=='Singapore')
+signal_text, signal_class, signal_note = get_signal(
+    g_india_sg['pval'], latest['India'], latest['Singapore'])
 
-FONT = dict(family="IBM Plex Sans", size=12, color="#1B2A4A")
+FONT   = dict(family="IBM Plex Sans", size=12, color="#1B2A4A")
 LAYOUT = dict(plot_bgcolor="white", paper_bgcolor="#FAF6F0",
               font=FONT, hovermode="x unified",
               margin=dict(l=0,r=0,t=30,b=60))
@@ -281,7 +277,8 @@ t1,t2,t3,t4,t5 = st.tabs([
 
 # ── TAB 1 ──────────────────────────────────────────────────────────────────────
 with t1:
-    st.markdown('<div class="sec-hdr">Consumer Price Index — India, Singapore, United Kingdom</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-hdr">Consumer Price Index — India, Singapore, United Kingdom</div>',
+                unsafe_allow_html=True)
 
     yr_range = st.select_slider("Date range",
         options=df.index.strftime("%Y-%m").tolist(),
@@ -310,19 +307,21 @@ with t1:
         font=dict(size=10,color="#1B2A4A"), xanchor="center")
 
     fig.update_layout(**LAYOUT, height=400,
-        legend=dict(orientation="h",y=-0.15,x=0.5,xanchor="center",bgcolor="rgba(0,0,0,0)",
-                    font=dict(size=13,color="#1B2A4A")),
-        yaxis=dict(title="CPI YoY (%)",gridcolor="#EEEEEE",zeroline=True,
-                   zerolinecolor="#CCCCCC",tickfont=dict(color="#1B2A4A",size=12),
-                   titlefont=dict(color="#1B2A4A")),
+        legend=dict(orientation="h",y=-0.15,x=0.5,xanchor="center",
+                    bgcolor="rgba(0,0,0,0)",font=dict(size=13,color="#1B2A4A")),
+        yaxis=dict(title=dict(text="CPI YoY (%)",font=dict(color="#1B2A4A")),
+                   gridcolor="#EEEEEE",zeroline=True,zerolinecolor="#CCCCCC",
+                   tickfont=dict(color="#1B2A4A",size=12)),
         xaxis=dict(gridcolor="#EEEEEE",tickfont=dict(color="#1B2A4A",size=12)))
 
     st.plotly_chart(fig, use_container_width=True)
     st.caption("Dotted verticals: MAS S$NEER tightening dates. Data calibrated to MAS Statistics, RBI DBIE, ONS.")
 
-    st.markdown('<div class="sec-hdr">Inflation Persistence — OLS β</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-hdr">Inflation Persistence — OLS β</div>',
+                unsafe_allow_html=True)
     pc1,pc2,pc3 = st.columns(3)
-    for col,c,clr in zip(["India","Singapore","UK"],[pc1,pc2,pc3],["#C0392B","#1B2A4A","#27AE60"]):
+    for col,c,clr in zip(["India","Singapore","UK"],[pc1,pc2,pc3],
+                          ["#C0392B","#1B2A4A","#27AE60"]):
         b = persistence[col]
         with c:
             st.markdown(f"""<div class="stat-card" style="border-left-color:{clr}">
@@ -332,7 +331,8 @@ with t1:
 
 # ── TAB 2 ──────────────────────────────────────────────────────────────────────
 with t2:
-    st.markdown('<div class="sec-hdr">Rolling 36-Month Granger Signal — India → Singapore</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-hdr">Rolling 36-Month Granger Signal — India → Singapore</div>',
+                unsafe_allow_html=True)
     st.markdown("""<div class="finding-box"><div class="finding-text">
         "India's CPI Granger-causes Singapore's with a two-month lag (p = 0.028).
         This rolling signal tracks whether that relationship holds in real time —
@@ -356,21 +356,24 @@ with t2:
     fig2.add_shape(type="line",
         x0=rolling.index.strftime("%Y-%m-%d")[0],
         x1=rolling.index.strftime("%Y-%m-%d")[-1],
-        y0=0.05, y1=0.05, line=dict(color="#C0392B",width=1.5,dash="dash"))
+        y0=0.05, y1=0.05,
+        line=dict(color="#C0392B",width=1.5,dash="dash"))
     fig2.add_shape(type="line",
         x0=rolling.index.strftime("%Y-%m-%d")[0],
         x1=rolling.index.strftime("%Y-%m-%d")[-1],
-        y0=0.10, y1=0.10, line=dict(color="#b8860b",width=1,dash="dot"))
+        y0=0.10, y1=0.10,
+        line=dict(color="#b8860b",width=1,dash="dot"))
     fig2.update_layout(**LAYOUT, height=340, showlegend=False,
         margin=dict(l=0,r=120,t=20,b=40),
-        yaxis=dict(title="p-value",gridcolor="#EEEEEE",range=[0,0.55],
-                   tickfont=dict(color="#1B2A4A",size=12),
-                   titlefont=dict(color="#1B2A4A")),
+        yaxis=dict(title=dict(text="p-value",font=dict(color="#1B2A4A")),
+                   gridcolor="#EEEEEE",range=[0,0.55],
+                   tickfont=dict(color="#1B2A4A",size=12)),
         xaxis=dict(gridcolor="#EEEEEE",tickfont=dict(color="#1B2A4A",size=12)))
     st.plotly_chart(fig2, use_container_width=True)
     st.caption("Rolling 36-month window. Below red dashed line = India Granger-causes Singapore at 5% significance.")
 
-    st.markdown('<div class="sec-hdr">Full Granger Causality Matrix</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-hdr">Full Granger Causality Matrix</div>',
+                unsafe_allow_html=True)
     expected_pairs = [r for r in granger_results if r['expected']]
     reverse_pairs  = [r for r in granger_results if not r['expected']]
     gc1,gc2 = st.columns(2)
@@ -397,8 +400,9 @@ with t2:
 
 # ── TAB 3 ──────────────────────────────────────────────────────────────────────
 with t3:
-    st.markdown('<div class="sec-hdr">Scenario Forecaster — What If India CPI Changes?</div>', unsafe_allow_html=True)
-    col_ctrl, col_out = st.columns([1,2])
+    st.markdown('<div class="sec-hdr">Scenario Forecaster — What If India CPI Changes?</div>',
+                unsafe_allow_html=True)
+    col_ctrl,col_out = st.columns([1,2])
 
     with col_ctrl:
         st.markdown("**Shock India CPI**")
@@ -431,11 +435,12 @@ with t3:
             fig3.add_trace(go.Scatter(
                 x=hist_24.index.strftime("%Y-%m-%d"), y=hist_24[country],
                 name=f"{country} (historical)",
-                line=dict(color="#1B2A4A" if country=="Singapore" else "#C0392B", width=2.5),
+                line=dict(color="#1B2A4A" if country=="Singapore" else "#C0392B",width=2.5),
                 showlegend=(col_idx==0)), row=row, col=col_n)
             fig3.add_trace(go.Scatter(
                 x=fc_base.index.strftime("%Y-%m-%d"), y=fc_base[country],
-                name="Baseline", line=dict(color="#888888",width=1.5,dash="dash"),
+                name="Baseline",
+                line=dict(color="#888888",width=1.5,dash="dash"),
                 showlegend=(col_idx==0)), row=row, col=col_n)
             if india_shock != 0:
                 shock_color = "#C0392B" if india_shock > 0 else "#27AE60"
@@ -446,21 +451,21 @@ with t3:
                     showlegend=(col_idx==0)), row=row, col=col_n)
                 upper = fc_shock[country] + resid_std[country]*np.sqrt(np.arange(1,horizon+1))
                 lower = fc_shock[country] - resid_std[country]*np.sqrt(np.arange(1,horizon+1))
-                x_band = list(fc_shock.index.strftime("%Y-%m-%d"))*2
                 fig3.add_trace(go.Scatter(
-                    x=list(fc_shock.index.strftime("%Y-%m-%d"))+list(fc_shock.index.strftime("%Y-%m-%d"))[::-1],
+                    x=list(fc_shock.index.strftime("%Y-%m-%d"))+
+                      list(fc_shock.index.strftime("%Y-%m-%d"))[::-1],
                     y=list(upper)+list(lower)[::-1],
                     fill="toself",
                     fillcolor=f"rgba({'192,57,43' if india_shock>0 else '39,174,96'},0.08)",
                     line=dict(color="rgba(0,0,0,0)"),
-                    name="±1σ band", showlegend=(col_idx==0)), row=row, col=col_n)
+                    name="±1σ band",showlegend=(col_idx==0)), row=row, col=col_n)
 
         fig3.update_layout(**LAYOUT, height=360,
             legend=dict(orientation="h",y=-0.2,x=0.5,xanchor="center",
                         bgcolor="rgba(0,0,0,0)",font=dict(size=11,color="#1B2A4A")),
             margin=dict(l=0,r=0,t=40,b=70))
-        fig3.update_yaxes(gridcolor="#EEEEEE",zeroline=True,zerolinecolor="#CCCCCC",
-                          tickfont=dict(color="#1B2A4A",size=11))
+        fig3.update_yaxes(gridcolor="#EEEEEE",zeroline=True,
+                          zerolinecolor="#CCCCCC",tickfont=dict(color="#1B2A4A",size=11))
         fig3.update_xaxes(gridcolor="#EEEEEE",tickfont=dict(color="#1B2A4A",size=11))
         fig3.update_annotations(font=dict(color="#1B2A4A",size=13))
         st.plotly_chart(fig3, use_container_width=True)
@@ -468,43 +473,46 @@ with t3:
         if india_shock != 0:
             sg_end_base  = fc_base["Singapore"].iloc[-1]
             sg_end_shock = fc_shock["Singapore"].iloc[-1]
-            sg_diff = sg_end_shock - sg_end_base
-            uk_diff = fc_shock["UK"].iloc[-1] - fc_base["UK"].iloc[-1]
+            sg_diff      = sg_end_shock - sg_end_base
+            uk_diff      = fc_shock["UK"].iloc[-1] - fc_base["UK"].iloc[-1]
             direction_sg = "higher" if sg_diff > 0 else "lower"
             st.markdown(f"""<div class="shock-result">
               <div class="shock-title">Scenario interpretation — {horizon}-month horizon</div>
               <div class="shock-body">A <b>{india_shock:+.2f}pp</b> shock to India CPI produces a
-              <b>{sg_diff:+.2f}pp</b> change in Singapore CPI and a <b>{uk_diff:+.2f}pp</b> change
-              in UK CPI over {horizon} months, consistent with the ~2-month Granger transmission lag
-              documented in Gokhale (2026). Singapore CPI reaches approximately
-              <b>{sg_end_shock:.1f}%</b> by {fc_shock.index[-1].strftime('%B %Y')}
+              <b>{sg_diff:+.2f}pp</b> change in Singapore CPI and a
+              <b>{uk_diff:+.2f}pp</b> change in UK CPI over {horizon} months,
+              consistent with the ~2-month Granger transmission lag documented in Gokhale (2026).
+              Singapore CPI reaches approximately <b>{sg_end_shock:.1f}%</b> by
+              {fc_shock.index[-1].strftime('%B %Y')}
               ({direction_sg} than the {sg_end_base:.1f}% baseline).</div>
             </div>""", unsafe_allow_html=True)
         else:
             sg_end = fc_base["Singapore"].iloc[-1]
             st.markdown(f"""<div class="shock-result">
               <div class="shock-title">Baseline forecast — {horizon} months</div>
-              <div class="shock-body">Under current conditions with no additional shock, the VAR model
-              projects Singapore CPI at approximately <b>{sg_end:.1f}%</b> by
-              {fc_base.index[-1].strftime('%B %Y')}. Use the slider to explore how an India CPI shock
-              transmits downstream.</div>
+              <div class="shock-body">Under current conditions with no additional shock,
+              the VAR model projects Singapore CPI at approximately <b>{sg_end:.1f}%</b>
+              by {fc_base.index[-1].strftime('%B %Y')}.
+              Use the slider to explore how an India CPI shock transmits downstream.</div>
             </div>""", unsafe_allow_html=True)
 
 # ── TAB 4 ──────────────────────────────────────────────────────────────────────
 with t4:
-    st.markdown('<div class="sec-hdr">VAR Coefficient Summary</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-hdr">VAR Coefficient Summary</div>',
+                unsafe_allow_html=True)
     try:
         st.code(str(var_result.summary())[:3000], language=None)
     except:
         st.write(var_result.params)
 
-    st.markdown('<div class="sec-hdr">Impulse Response Functions — Cholesky: India → Singapore → UK</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-hdr">Impulse Response Functions — Cholesky: India → Singapore → UK</div>',
+                unsafe_allow_html=True)
     try:
-        irf = var_result.irf(periods=12)
+        irf      = var_result.irf(periods=12)
         irf_vals = irf.orth_irfs
-        countries = ["India","Singapore","UK"]
-        shock_idx = countries.index("India")
-        colors_irf = {"India":"#C0392B","Singapore":"#1B2A4A","UK":"#27AE60"}
+        countries   = ["India","Singapore","UK"]
+        shock_idx   = countries.index("India")
+        colors_irf  = {"India":"#C0392B","Singapore":"#1B2A4A","UK":"#27AE60"}
         fig_irf = go.Figure()
         for resp_idx, resp_country in enumerate(countries):
             fig_irf.add_trace(go.Scatter(
@@ -516,12 +524,14 @@ with t4:
         fig_irf.add_shape(type="line",x0=0,x1=12,y0=0,y1=0,
                           line=dict(color="#CCCCCC",width=1))
         fig_irf.update_layout(**LAYOUT, height=340,
-            xaxis=dict(title="Months after shock",gridcolor="#EEEEEE",
-                       tickvals=list(range(13)),tickfont=dict(color="#1B2A4A",size=12),
-                       titlefont=dict(color="#1B2A4A")),
-            yaxis=dict(title="Orthogonalised response",gridcolor="#EEEEEE",
-                       tickfont=dict(color="#1B2A4A",size=12),
-                       titlefont=dict(color="#1B2A4A")),
+            xaxis=dict(
+                title=dict(text="Months after shock",font=dict(color="#1B2A4A")),
+                gridcolor="#EEEEEE",tickvals=list(range(13)),
+                tickfont=dict(color="#1B2A4A",size=12)),
+            yaxis=dict(
+                title=dict(text="Orthogonalised response",font=dict(color="#1B2A4A")),
+                gridcolor="#EEEEEE",
+                tickfont=dict(color="#1B2A4A",size=12)),
             legend=dict(orientation="h",y=-0.2,x=0.5,xanchor="center",
                         bgcolor="rgba(0,0,0,0)",font=dict(size=12,color="#1B2A4A")),
             margin=dict(l=0,r=0,t=20,b=70))
@@ -575,20 +585,21 @@ Orthogonalised impulse responses with ordering India → Singapore → UK,
 consistent with the Granger causality hierarchy.
         """)
 
-    st.markdown('<div class="sec-hdr">Key Results from Gokhale (2026)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-hdr">Key Results from Gokhale (2026)</div>',
+                unsafe_allow_html=True)
     st.dataframe(pd.DataFrame({
-        "Result": [
+        "Result":[
             "India → Singapore (Granger)","India → UK (Granger)",
             "Singapore → UK (Granger)","Singapore → India (Granger)",
             "UK → Singapore (Granger)","Persistence β — India",
             "Persistence β — Singapore","Persistence β — UK",
         ],
-        "Value": [
+        "Value":[
             "p = 0.028 ✓","p = 0.018 ✓","p = 0.039 ✓",
             "p = 0.080 ✗","p = 0.649 ✗",
             "β = 0.9526 (R²=0.889)","β = 0.9693 (R²=0.950)","β = 0.9876 (R²=0.975)",
         ],
-        "Interpretation": [
+        "Interpretation":[
             "India CPI leads Singapore by ~2 months","India CPI leads UK",
             "Singapore CPI leads UK","Not significant — as expected",
             "Not significant — as expected","High persistence, supply-driven volatility",
@@ -598,11 +609,16 @@ consistent with the Granger causality hierarchy.
 
     st.markdown('<div class="sec-hdr">Policy Implications</div>', unsafe_allow_html=True)
     st.markdown("""
-1. **MAS calibration** — S$NEER framework effectiveness depends on identifying upstream India supply shocks, not only advanced economy financial conditions.
+1. **MAS calibration** — S$NEER framework effectiveness depends on identifying upstream
+   India supply shocks, not only advanced economy financial conditions.
 
-2. **Attribution** — If inflation was substantially upstream-driven, advanced economy rate hikes were treating a symptom. The Diebold-Mariano test confirms the multi-country VAR outperforms naive benchmarks (p < 0.05).
+2. **Attribution** — If inflation was substantially upstream-driven, advanced economy
+   rate hikes were treating a symptom. The Diebold-Mariano test confirms the multi-country
+   VAR outperforms naive benchmarks (p < 0.05).
 
-3. **Forecast** — Extended VAR projection places Singapore CPI at 1.5–2.0% through December 2026, consistent with a completed post-pandemic adjustment absent fresh shocks.
+3. **Forecast** — Extended VAR projection places Singapore CPI at 1.5–2.0% through
+   December 2026, consistent with a completed post-pandemic adjustment absent fresh shocks.
     """)
     st.markdown("---")
-    st.caption("Built by Anuja A. Gokhale · NUS Applied Economics · Merit Scholar · anujagokhale1604@gmail.com · anujagokhale.github.io")
+    st.caption("Built by Anuja A. Gokhale · NUS Applied Economics · Merit Scholar · "
+               "anujagokhale1604@gmail.com · anujagokhale.github.io")
