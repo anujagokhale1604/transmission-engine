@@ -1,5 +1,5 @@
-streamlit==1.45.0
-pandas==2.2.3
-numpy==1.26.4
-plotly==5.22.0
-statsmodels==0.14.4
+streamlit
+pandas
+numpy
+statsmodels
+plotly>=5.0.0
