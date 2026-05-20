@@ -165,8 +165,8 @@ g_india_sg      = next(r for r in granger_results if r['cause']=='India' and r['
 signal_text,signal_class,signal_note = get_signal(g_india_sg['pval'],latest['India'],latest['Singapore'])
 
 FONT   = dict(family="IBM Plex Sans",size=12,color="#1B2A4A")
-LAYOUT = dict(plot_bgcolor="white",paper_bgcolor="#FAF6F0",font=FONT,
-              hovermode="x unified",margin=dict(l=0,r=0,t=30,b=60))
+# NOTE: margin is NOT in LAYOUT — pass per-figure to avoid duplicate keyword errors (plotly 6)
+LAYOUT = dict(plot_bgcolor="white",paper_bgcolor="#FAF6F0",font=FONT,hovermode="x unified")
 
 st.markdown(f"""
 <div class="masthead">
@@ -219,6 +219,7 @@ with t1:
     fig.add_annotation(x="2022-04-01",y=1.04,yref="paper",text="MAS tightening cycle",
         showarrow=False,font=dict(size=10,color="#1B2A4A"),xanchor="center")
     fig.update_layout(**LAYOUT,height=400,
+        margin=dict(l=0,r=0,t=30,b=60),
         legend=dict(orientation="h",y=-0.15,x=0.5,xanchor="center",
                     bgcolor="rgba(0,0,0,0)",font=dict(size=13,color="#1B2A4A")),
         yaxis=dict(title="CPI YoY (%)",gridcolor="#EEEEEE",zeroline=True,
@@ -226,7 +227,7 @@ with t1:
                    tickcolor="#1B2A4A"),
         xaxis=dict(gridcolor="#EEEEEE",tickfont=dict(color="#1B2A4A",size=12),
                    tickcolor="#1B2A4A"))
-    st.plotly_chart(fig,use_container_width=True)
+    st.plotly_chart(fig,width='stretch')
     st.caption("Dotted verticals: MAS S$NEER tightening dates. Data calibrated to MAS Statistics, RBI DBIE, ONS.")
     st.markdown('<div class="sec-hdr">Inflation Persistence — OLS β</div>',unsafe_allow_html=True)
     pc1,pc2,pc3 = st.columns(3)
@@ -267,7 +268,7 @@ with t2:
                    tickfont=dict(color="#1B2A4A",size=12),tickcolor="#1B2A4A"),
         xaxis=dict(gridcolor="#EEEEEE",tickfont=dict(color="#1B2A4A",size=12),
                    tickcolor="#1B2A4A"))
-    st.plotly_chart(fig2,use_container_width=True)
+    st.plotly_chart(fig2,width='stretch')
     st.caption("Rolling 36-month window. Below red dashed line = India Granger-causes Singapore at 5% significance.")
     st.markdown('<div class="sec-hdr">Full Granger Causality Matrix</div>',unsafe_allow_html=True)
     expected_pairs = [r for r in granger_results if r['expected']]
@@ -343,15 +344,15 @@ with t3:
                     line=dict(color="rgba(0,0,0,0)"),name="±1σ band",showlegend=(col_idx==0)),
                     row=row,col=col_n)
         fig3.update_layout(**LAYOUT,height=360,
+            margin=dict(l=0,r=0,t=40,b=70),
             legend=dict(orientation="h",y=-0.2,x=0.5,xanchor="center",
-                        bgcolor="rgba(0,0,0,0)",font=dict(size=11,color="#1B2A4A")),
-            margin=dict(l=0,r=0,t=40,b=70))
+                        bgcolor="rgba(0,0,0,0)",font=dict(size=11,color="#1B2A4A")))
         fig3.update_yaxes(gridcolor="#EEEEEE",zeroline=True,zerolinecolor="#CCCCCC",
                           tickfont=dict(color="#1B2A4A",size=11),tickcolor="#1B2A4A")
         fig3.update_xaxes(gridcolor="#EEEEEE",tickfont=dict(color="#1B2A4A",size=11),
                           tickcolor="#1B2A4A")
         fig3.update_annotations(font=dict(color="#1B2A4A",size=13))
-        st.plotly_chart(fig3,use_container_width=True)
+        st.plotly_chart(fig3,width='stretch')
         if india_shock!=0:
             sg_end_base  = fc_base["Singapore"].iloc[-1]
             sg_end_shock = fc_shock["Singapore"].iloc[-1]
@@ -396,14 +397,14 @@ with t4:
                 hovertemplate=f"Period %{{x}}: %{{y:.4f}}<extra>{resp_country}</extra>"))
         fig_irf.add_shape(type="line",x0=0,x1=12,y0=0,y1=0,line=dict(color="#CCCCCC",width=1))
         fig_irf.update_layout(**LAYOUT,height=340,
+            margin=dict(l=0,r=0,t=20,b=70),
             xaxis=dict(title="Months after shock",gridcolor="#EEEEEE",tickvals=list(range(13)),
                        tickfont=dict(color="#1B2A4A",size=12),tickcolor="#1B2A4A"),
             yaxis=dict(title="Orthogonalised response",gridcolor="#EEEEEE",
                        tickfont=dict(color="#1B2A4A",size=12),tickcolor="#1B2A4A"),
             legend=dict(orientation="h",y=-0.2,x=0.5,xanchor="center",
-                        bgcolor="rgba(0,0,0,0)",font=dict(size=12,color="#1B2A4A")),
-            margin=dict(l=0,r=0,t=20,b=70))
-        st.plotly_chart(fig_irf,use_container_width=True)
+                        bgcolor="rgba(0,0,0,0)",font=dict(size=12,color="#1B2A4A")))
+        st.plotly_chart(fig_irf,width='stretch')
         st.caption("One standard deviation orthogonalised shock to India CPI. Cholesky ordering: India → Singapore → UK.")
     except Exception as e:
         st.warning(f"IRF computation: {e}")
@@ -472,3 +473,5 @@ consistent with the Granger causality hierarchy.
     """)
     st.markdown("---")
     st.caption("Built by Anuja A. Gokhale · NUS Applied Economics · Merit Scholar · anujagokhale1604@gmail.com · anujagokhale.github.io")
+PYEOF
+
