@@ -378,10 +378,35 @@ with t3:
 
 with t4:
     st.markdown('<div class="sec-hdr">VAR Coefficient Summary</div>',unsafe_allow_html=True)
+    st.markdown("""<style>
+    .var-summary pre, .stCode pre, pre {
+        background:#FFFFFF !important;
+        color:#1B2A4A !important;
+        font-family:'IBM Plex Mono',monospace !important;
+        font-size:11px !important;
+        border:1px solid #d4c4a8 !important;
+        border-radius:6px !important;
+        padding:14px !important;
+    }
+    .stCode code, code { color:#1B2A4A !important; background:transparent !important; }
+    </style>""", unsafe_allow_html=True)
     try:
-        st.code(str(var_result.summary())[:3000],language=None)
-    except:
-        st.write(var_result.params)
+        # Build a clean readable coefficient table instead of raw summary
+        coef_df = pd.DataFrame(var_result.params)
+        coef_df.index = [str(i) for i in coef_df.index]
+        coef_df = coef_df.round(4)
+        st.dataframe(
+            coef_df.style.set_properties(**{
+                'background-color': '#FFFFFF',
+                'color': '#1B2A4A',
+                'font-family': 'IBM Plex Mono',
+                'font-size': '12px'
+            }),
+            use_container_width=True
+        )
+        st.caption("VAR(2) estimated coefficients. Rows: lagged regressors (L1, L2 of each series + constant). Columns: equation for each country.")
+    except Exception as e:
+        st.warning(f"Coefficient display: {e}")
     st.markdown('<div class="sec-hdr">Impulse Response Functions — Cholesky: India → Singapore → UK</div>',unsafe_allow_html=True)
     try:
         irf      = var_result.irf(periods=12)
